@@ -1,0 +1,26 @@
+{
+  "name": "darwin-semantic-rd-graph",
+  "version": "0.0.1",
+  "description": "DARWIN v2.1.1 — Semantic R&D Graph. Acceptance gates F0–F5. NO-GO until verified.",
+  "type": "module",
+  "engines": {
+    "node": ">=24.0.0",
+    "npm": ">=11.0.0"
+  },
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "validate:schema": "node scripts/validate-graphql-schema.js",
+    "audit:f0": "node scripts/f0-audit-baseline.js",
+    "dev": "echo 'Development server not initialized. Implement after F1.'",
+    "build": "echo 'Build not initialized. Implement after F1.'"
+  },
+  "dependencies": {
+    "graphql": "^16.8.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.48.2",
+    "@types/node": "^22.7.0",
+    "typescript": "^5.6.3"
+  }
+}
