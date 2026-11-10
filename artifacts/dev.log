@@ -1,8 +1,8 @@
-[dev] START 2026-11-10T08:59:29.934Z node=v24.22.2
+[dev] START 2026-11-10T09:04:42.867Z node=v24.22.2
 Schema válido: buildSchema + validateSchema; 7 implementações.
 LIMITE: O SDL declara campos entityId e revisionId distintos, mas não prova desigualdade dos valores em execução.
 LIMITE: Append-only, autorização, persistência, isolamentos e os gates técnicos não são comprovados por esta auditoria F0.
-LISTENING http://127.0.0.1:43281
+LISTENING http://127.0.0.1:39275
 Escopo F0: recursos estáticos; sem aplicação, persistência ou execução GraphQL.
 Encerrando servidor F0.
 [dev] PASS

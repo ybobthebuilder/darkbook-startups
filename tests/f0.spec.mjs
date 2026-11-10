@@ -2,25 +2,25 @@ import { test, expect } from '@playwright/test';
 import { spawn, spawnSync } from 'node:child_process';
 import { request as httpRequest } from 'node:http';
 import { once } from 'node:events';
-import { access, chmod, copyFile, cp, mkdir, mkdtemp, readFile, readdir, rm, rmdir, symlink, writeFile } from 'node:fs/promises';
+import { access, copyFile, cp, mkdir, mkdtemp, readFile, readdir, rm, rmdir, symlink, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { root, schemaFile, registryFile, normativeHashes, sha256 } from '../scripts/lib.mjs';
 
 const fixtures = join(root, 'test-results', 'f0-fixtures');
 let fixture;
 const servers = new Set();
+const mirrorFile = 'sergiotavio_darwin_acceptance_gates_v2_1_1.md';
 const read = (file) => readFile(join(fixture, file), 'utf8');
 const write = (file, value) => writeFile(join(fixture, file), value);
 const run = (name, options = {}) => spawnSync(process.execPath, [join(fixture, 'scripts', `${name}.mjs`)], {
-  cwd: join(fixture, 'docs'), encoding: 'utf8', timeout: 20_000, ...options,
+  cwd: fixture, encoding: 'utf8', timeout: 20_000, ...options,
 });
 const report = async () => JSON.parse(await read('artifacts/audit-f0-report.json'));
-const failCheck = async (id) => expect((await report()).checks.find((check) => check.id === id)?.status).toBe('FAIL');
 
 test.beforeEach(async () => {
   await mkdir(fixtures, { recursive: true });
   fixture = await mkdtemp(join(fixtures, 'case-'));
-  for (const file of ['package.json', 'package-lock.json', 'playwright.config.mjs', schemaFile, registryFile]) {
+  for (const file of ['package.json', 'package-lock.json', 'playwright.config.mjs', schemaFile, registryFile, mirrorFile]) {
     await copyFile(join(root, file), join(fixture, file));
   }
   for (const directory of ['scripts', 'docs', 'tests']) {
@@ -46,12 +46,11 @@ test.afterAll(async () => {
   await rmdir(fixtures).catch(() => {});
 });
 
-test('valid schema checks definitions and honestly logs runtime limits from any cwd', async () => {
+test('literal validator passes lexical checks and writes only check lines', async () => {
   const result = run('validate-schema');
   expect(result.status, result.stdout + result.stderr).toBe(0);
-  expect(result.stdout).toContain('7 implementações');
-  expect(result.stdout).toContain('não prova desigualdade');
-  expect(await read('artifacts/validate-schema.log')).toBe(result.stdout);
+  expect(result.stdout).toBe('PASS entityId\nPASS revisionId\nPASS branchId\nPASS sem campo proibido 1\nPASS sem campo proibido 2\nPASS tem Mutation\nPASS tem Query\nPASS tem IsolationReason\nPASS tem ScopeKind\nPASS tem idempotencyKey\n');
+  expect(await read('artifacts/validate-schema.log')).toBe(result.stdout.trimEnd());
   for (const [file, hash] of Object.entries(normativeHashes)) expect(sha256(await read(file))).toBe(hash);
 });
 
@@ -73,30 +72,69 @@ for (const [name, transform] of [
   ['generic argument', (s) => `${s}\nextend type Mutation { createRevision(changeSet: JSON): Claim }`],
   ['generic output field', (s) => `${s}\nextend type Claim { modifications: JSON }`],
 ]) {
-  test(`validator rejects ${name} with a literal failure log`, async () => {
+  test(`build and dev strong validation reject ${name}`, async () => {
     await write(schemaFile, transform(await read(schemaFile)));
-    const result = run('validate-schema');
-    expect(result.status, result.stdout + result.stderr).toBe(1);
-    expect(result.stdout).toContain('[validate-schema] FAIL');
-    expect(await read('artifacts/validate-schema.log')).toBe(result.stdout);
+    for (const command of ['build', 'dev']) {
+      const result = run(command, { env: { ...process.env, PORT: '0' } });
+      expect(result.status, result.stdout + result.stderr).toBe(1);
+      expect(result.stdout).toContain(`[${command}] FAIL`);
+      expect(result.stdout).not.toContain('LISTENING');
+      expect(await read(`artifacts/${command}.log`)).toBe(result.stdout);
+    }
   });
 }
 
-test('validator logs missing schema and exits nonzero', async () => {
+for (const [field, check] of [['updatedAt', 'sem campo proibido 1'], ['changes:', 'sem campo proibido 2']]) {
+  test(`literal validator rejects ${field} even in comments`, async () => {
+    await write(schemaFile, `${await read(schemaFile)}\n# ${field}\n`);
+    const result = run('validate-schema');
+    expect(result.status).toBe(1);
+    expect(result.stdout).toContain(`FAIL ${check}\n`);
+    expect(await read('artifacts/validate-schema.log')).toBe(result.stdout.trimEnd());
+  });
+}
+
+test('validator missing contract prints exact failure without creating a log', async () => {
   await rm(join(fixture, schemaFile));
   const result = run('validate-schema');
   expect(result.status).toBe(1);
-  expect(await read('artifacts/validate-schema.log')).toContain('ENOENT');
+  expect(result.stdout).toBe('FAIL: arquivo do contrato não encontrado\n');
+  await expect(access(join(fixture, 'artifacts/validate-schema.log'))).rejects.toThrow();
 });
 
-test('SDL comments do not masquerade as banned fields', async () => {
-  await write(schemaFile, `${await read(schemaFile)}\n# deleteHistory(changes: JSON) is prohibited\n`);
+test('missing contract leaves a previous validator log unchanged', async () => {
   expect(run('validate-schema').status).toBe(0);
+  const previous = await read('artifacts/validate-schema.log');
+  await rm(join(fixture, schemaFile));
+  expect(run('validate-schema').status).toBe(1);
+  expect(await read('artifacts/validate-schema.log')).toBe(previous);
+});
+
+test('literal validator is cwd-dependent', async () => {
+  const result = run('validate-schema', { cwd: join(fixture, 'docs') });
+  expect(result.status).toBe(1);
+  expect(result.stdout).toBe('FAIL: arquivo do contrato não encontrado\n');
+});
+
+test('strong validation ignores comments but lexical validation does not', async () => {
+  await write(schemaFile, `${await read(schemaFile)}\n# deleteHistory(changes: JSON) is prohibited\n`);
+  expect(run('validate-schema').status).toBe(1);
+  const result = run('build');
+  expect(result.stdout).toContain('7 implementações');
+  expect(result.stdout).toContain('Normative file changed');
+});
+
+test('lexical validation accepts invalid SDL when all tokens remain', async () => {
+  await write(schemaFile, `${await read(schemaFile)}\ntype Broken {`);
+  expect(run('validate-schema').status).toBe(0);
+  expect(run('build').stdout).toContain('Syntax Error');
 });
 
 test('build emits real deterministic bundle, hashes and literal log without modifying sources', async () => {
-  const first = run('build');
+  const first = run('build', { cwd: join(fixture, 'docs') });
   expect(first.status, first.stdout + first.stderr).toBe(0);
+  expect(first.stdout).toContain('7 implementações');
+  expect(first.stdout).toContain('não prova desigualdade');
   expect(await readdir(join(fixture, 'dist'))).toEqual([schemaFile, 'manifest.json', registryFile].sort());
   const manifest = await read('dist/manifest.json');
   const data = JSON.parse(manifest);
@@ -128,86 +166,80 @@ for (const file of [schemaFile, registryFile]) {
   });
 }
 
-test('audit inventories real files and passes only F0, without gate promotion', async () => {
+test('audit checks existence and script presence without promoting gates or generating a log', async () => {
   const result = run('audit-f0');
   expect(result.status, result.stdout + result.stderr).toBe(0);
-  const data = await report();
-  expect(data.status).toBe('PASS');
-  expect(data.release_decision).toBe('NO_GO');
-  expect(data.gates).toHaveLength(14);
-  expect(data.gates.every((gate) => gate.status === 'NOT_VERIFIED' && gate.evidence === '')).toBe(true);
-  expect(data.inventories.root.some((entry) => entry.name === schemaFile)).toBe(true);
-  expect(data.inventories.scripts.filter((entry) => entry.executable)).toHaveLength(4);
-  expect(data.checks.every((check) => check.status === 'PASS')).toBe(true);
-  expect(data.scope_limits.join(' ')).toContain('Append-only');
-  expect(await read('artifacts/audit-f0.log')).toBe(result.stdout);
+  expect(result.stdout).toBe('F0 audit — faltando: nenhum\nF0 audit — scripts ok: sim\n');
+  expect(await report()).toEqual({ missing: [], scriptsOk: true, status: 'PASS' });
+  expect(await read('artifacts/audit-f0-report.json')).toBe(JSON.stringify(await report(), null, 2));
+  await expect(access(join(fixture, 'artifacts/audit-f0.log'))).rejects.toThrow();
   expect(sha256(await read(registryFile))).toBe(normativeHashes[registryFile]);
+  const registry = JSON.parse(await read(registryFile));
+  expect(registry.release_decision).toBe('NO_GO');
+  expect(registry.gates).toHaveLength(14);
+  expect(registry.gates.every((gate) => gate.status === 'NOT_VERIFIED' && gate.evidence === '')).toBe(true);
 });
 
-for (const [name, mutate] of [
-  ['duplicate ID', (r) => { r.gates[1].id = r.gates[0].id; }],
-  ['missing ID', (r) => { r.gates.pop(); }],
-  ['extra ID', (r) => { r.gates.push({ id: 'EXTRA', status: 'NOT_VERIFIED', evidence: '' }); }],
-  ['promoted gate', (r) => { r.gates[0].status = 'PASS'; }],
-  ['invented evidence', (r) => { r.gates[0].evidence = 'unsupported'; }],
-  ['GO release', (r) => { r.release_decision = 'GO'; }],
-]) {
-  test(`audit rejects registry ${name}, writes failure report and retains NO_GO`, async () => {
-    const registry = JSON.parse(await read(registryFile));
-    mutate(registry);
-    await write(registryFile, JSON.stringify(registry));
-    expect(run('audit-f0').status).toBe(1);
-    await failCheck('registry.baseline');
-    expect((await report()).status).toBe('FAIL');
-    expect((await report()).release_decision).toBe('NO_GO');
-  });
-}
+test('documented mirror faithfully transcribes every registry field and gate', async () => {
+  const registry = JSON.parse(await read(registryFile));
+  const mirror = await read(mirrorFile);
+  for (const [key, value] of Object.entries(registry).filter(([key]) => !['rules', 'gates'].includes(key))) {
+    expect(mirror).toContain(`- ${key}: \`${value}\``);
+  }
+  for (const rule of registry.rules) expect(mirror).toContain(`- ${rule}`);
+  const rows = mirror.split('\n').filter((line) => /^\| (G\d|SEC-)/.test(line));
+  expect(rows).toEqual(registry.gates.map((gate) => `| ${gate.id} | ${gate.title} | ${gate.status} |${gate.evidence ? ` ${gate.evidence} ` : ' '}|`));
+});
 
-for (const file of [schemaFile, registryFile, 'docs/F0-spec.md', 'package.json', 'package-lock.json', 'playwright.config.mjs', 'scripts/build.mjs', 'scripts/dev.mjs', 'scripts/validate-schema.mjs', 'tests/f0.spec.mjs']) {
-  test(`audit still writes report when required file ${file} is missing`, async () => {
+for (const file of [schemaFile, registryFile, mirrorFile, 'docs/F0-spec.md', 'scripts/build.mjs', 'scripts/dev.mjs', 'scripts/validate-schema.mjs']) {
+  test(`audit reports missing required path ${file}`, async () => {
     await rm(join(fixture, file));
-    expect(run('audit-f0').status).toBe(1);
-    await failCheck(`file:${file}`);
-    expect((await report()).release_decision).toBe('NO_GO');
-    expect(await read('artifacts/audit-f0.log')).toContain('[audit-f0] FAIL');
+    const result = run('audit-f0');
+    expect(result.status).toBe(1);
+    expect(result.stdout).toBe(`F0 audit — faltando: ${file}\nF0 audit — scripts ok: sim\n`);
+    expect(await report()).toEqual({ missing: [file], scriptsOk: true, status: 'FAIL' });
   });
 }
 
-test('audit reports invalid SDL and malformed registry independently', async () => {
+test('audit does not validate schema or registry content', async () => {
   await write(schemaFile, 'broken schema');
   await write(registryFile, 'broken json');
-  expect(run('audit-f0').status).toBe(1);
-  await failCheck('schema.validity-and-f0-structure');
-  await failCheck('registry.baseline');
-  await failCheck(`normative:${schemaFile}`);
+  expect(run('audit-f0').status).toBe(0);
+  expect(await report()).toEqual({ missing: [], scriptsOk: true, status: 'PASS' });
 });
 
-test('audit checks engines, mappings, permissions and placeholders explicitly', async () => {
+test('audit accepts any truthy script mapping rather than checking command semantics', async () => {
   const pkg = JSON.parse(await read('package.json'));
-  pkg.engines.node = '>=18';
-  pkg.engines.npm = '>=9';
   pkg.scripts.build = 'echo success';
   await write('package.json', JSON.stringify(pkg));
-  await chmod(join(fixture, 'scripts/build.mjs'), 0o644);
-  await write('scripts/dev.mjs', `${await read('scripts/dev.mjs')}\n// TODO implement server\n`);
-  expect(run('audit-f0').status).toBe(1);
-  for (const id of ['engines.declared', 'scripts.mappings', 'executable:build', 'scripts.no-placeholders']) await failCheck(id);
+  expect(run('audit-f0').status).toBe(0);
+  expect((await report()).scriptsOk).toBe(true);
 });
 
-test('audit checks actual npm runtime instead of trusting package declarations', async () => {
-  const bin = join(fixture, 'bin');
-  await mkdir(bin);
-  await writeFile(join(bin, 'npm'), '#!/bin/sh\nprintf "10.0.0\\n"\n', { mode: 0o755 });
-  expect(run('audit-f0', { env: { ...process.env, PATH: `${bin}:${process.env.PATH}` } }).status).toBe(1);
-  await failCheck('engines.runtime.npm');
-});
+for (const mapping of ['validate:schema', 'audit:f0', 'dev', 'build']) {
+  test(`audit fails when script mapping ${mapping} is missing`, async () => {
+    const pkg = JSON.parse(await read('package.json'));
+    delete pkg.scripts[mapping];
+    await write('package.json', JSON.stringify(pkg));
+    const result = run('audit-f0');
+    expect(result.status).toBe(1);
+    expect(result.stdout).toBe('F0 audit — faltando: nenhum\nF0 audit — scripts ok: não\n');
+    expect(await report()).toEqual({ missing: [], scriptsOk: false, status: 'FAIL' });
+  });
+}
 
-test('audit records missing npm runtime and still writes the report', async () => {
-  const bin = join(fixture, 'empty-bin');
-  await mkdir(bin);
-  expect(run('audit-f0', { env: { ...process.env, PATH: bin } }).status).toBe(1);
-  await failCheck('engines.runtime.npm');
-  expect((await report()).release_decision).toBe('NO_GO');
+for (const condition of ['missing', 'invalid']) {
+  test(`audit ${condition} package.json throws before writing a report`, async () => {
+    if (condition === 'missing') await rm(join(fixture, 'package.json'));
+    else await write('package.json', 'invalid JSON');
+    expect(run('audit-f0').status).toBe(1);
+    await expect(access(join(fixture, 'artifacts/audit-f0-report.json'))).rejects.toThrow();
+  });
+}
+
+test('audit depends on cwd and cannot find package.json from docs', async () => {
+  expect(run('audit-f0', { cwd: join(fixture, 'docs') }).status).toBe(1);
+  await expect(access(join(fixture, 'docs/artifacts/audit-f0-report.json'))).rejects.toThrow();
 });
 
 function rawRequest(port, path, method = 'GET') {

@@ -1,10 +1,10 @@
-[validate-schema] START 2026-11-10T08:58:47.952Z node=v24.22.2
-Schema válido: buildSchema + validateSchema; 7 implementações.
-LIMITE: O SDL declara campos entityId e revisionId distintos, mas não prova desigualdade dos valores em execução.
-LIMITE: Append-only, autorização, persistência, isolamentos e os gates técnicos não são comprovados por esta auditoria F0.
-[validate-schema] PASS
-[validate-schema] START 2026-11-10T09:01:20.662Z node=v24.22.2
-Schema válido: buildSchema + validateSchema; 7 implementações.
-LIMITE: O SDL declara campos entityId e revisionId distintos, mas não prova desigualdade dos valores em execução.
-LIMITE: Append-only, autorização, persistência, isolamentos e os gates técnicos não são comprovados por esta auditoria F0.
-[validate-schema] PASS
+PASS entityId
+PASS revisionId
+PASS branchId
+PASS sem campo proibido 1
+PASS sem campo proibido 2
+PASS tem Mutation
+PASS tem Query
+PASS tem IsolationReason
+PASS tem ScopeKind
+PASS tem idempotencyKey

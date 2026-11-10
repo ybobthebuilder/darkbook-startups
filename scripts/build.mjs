@@ -2,7 +2,7 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { execute, normativeHashes, read, registryFile, root, schemaFile, sha256 } from './lib.mjs';
-import { validateAndLog } from './validate-schema.mjs';
+import { validateAndLog } from './contract.mjs';
 
 await execute('build', async (log) => {
   validateAndLog(log);

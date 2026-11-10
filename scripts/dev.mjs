@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { createServer } from 'node:http';
 import { execute, read, registryFile, schemaFile } from './lib.mjs';
-import { validateAndLog } from './validate-schema.mjs';
+import { validateAndLog } from './contract.mjs';
 
 await execute('dev', async (log) => {
   validateAndLog(log);
