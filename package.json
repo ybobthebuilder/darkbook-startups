@@ -16,6 +16,7 @@
     "build": "echo 'Build not initialized. Implement after F1.'"
   },
   "dependencies": {
+    "@opentelemetry/api": "^1.10.0",
     "graphql": "^16.8.1"
   },
   "devDependencies": {
