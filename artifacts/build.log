@@ -1,0 +1,12 @@
+[build] START 2026-11-10T08:58:48.111Z node=v24.22.2
+Schema válido: buildSchema + validateSchema; 7 implementações.
+LIMITE: O SDL declara campos entityId e revisionId distintos, mas não prova desigualdade dos valores em execução.
+LIMITE: Append-only, autorização, persistência, isolamentos e os gates técnicos não são comprovados por esta auditoria F0.
+Bundle determinístico produzido em dist/: dois contratos e manifest.json (SHA-256).
+[build] PASS
+[build] START 2026-11-10T09:01:20.832Z node=v24.22.2
+Schema válido: buildSchema + validateSchema; 7 implementações.
+LIMITE: O SDL declara campos entityId e revisionId distintos, mas não prova desigualdade dos valores em execução.
+LIMITE: Append-only, autorização, persistência, isolamentos e os gates técnicos não são comprovados por esta auditoria F0.
+Bundle determinístico produzido em dist/: dois contratos e manifest.json (SHA-256).
+[build] PASS

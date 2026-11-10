@@ -1,0 +1,32 @@
+[audit-f0] START 2026-11-10T09:01:39.156Z node=v24.22.2
+PASS inventory.root: 13 entradas (sem .git; não recursivo)
+PASS inventory.scripts: 5 entradas
+PASS file:package.json: OK
+PASS file:package-lock.json: OK
+PASS file:playwright.config.mjs: OK
+PASS file:docs/F0-spec.md: OK
+PASS file:darwin_semantic_contract_v2.graphql: OK
+PASS file:sergiotavio_darwin_gate_registry_v2_1_1.json: OK
+PASS file:scripts/lib.mjs: OK
+PASS file:scripts/validate-schema.mjs: OK
+PASS file:scripts/audit-f0.mjs: OK
+PASS file:scripts/dev.mjs: OK
+PASS file:scripts/build.mjs: OK
+PASS file:tests/f0.spec.mjs: OK
+PASS engines.declared: {"node":">=24.0.0","npm":">=11.0.0"}
+PASS engines.runtime.node: v24.22.2
+PASS engines.runtime.npm: 11.19.1
+PASS scripts.mappings: {"test":"playwright test","test:headed":"playwright test --headed","validate:schema":"node scripts/validate-schema.mjs","audit:f0":"node scripts/audit-f0.mjs","dev":"node scripts/dev.mjs","build":"node scripts/build.mjs"}
+PASS executable:validate-schema: OK
+PASS executable:audit-f0: OK
+PASS executable:dev: OK
+PASS executable:build: OK
+PASS scripts.no-placeholders: Inspeção estática dos scripts; execução coberta pelos testes, não inferida por esta busca.
+PASS normative:darwin_semantic_contract_v2.graphql: SHA-256 057150d790fdf7c2a24f595c9102422651767c0e0209a1c03ae41e792497d027
+PASS normative:sergiotavio_darwin_gate_registry_v2_1_1.json: SHA-256 ef63a225f119c508b0a5dd9843b1338a82ff2c6bdfdbaeede49972398e85e1cc
+PASS schema.validity-and-f0-structure: buildSchema + validateSchema, RevisionedNode, implementações, mutações e campos genéricos.
+PASS registry.baseline: 14 gates NOT_VERIFIED; release_decision NO_GO; nenhuma promoção.
+Relatório: artifacts/audit-f0-report.json; F0=PASS; release_decision=NO_GO
+LIMITE: O SDL declara campos entityId e revisionId distintos, mas não prova desigualdade dos valores em execução.
+LIMITE: Append-only, autorização, persistência, isolamentos e os gates técnicos não são comprovados por esta auditoria F0.
+[audit-f0] PASS

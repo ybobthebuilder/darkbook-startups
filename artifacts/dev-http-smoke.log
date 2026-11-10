@@ -1,0 +1,6 @@
+GET /health
+{"status":"ok","scope":"F0","release_decision":"NO_GO"}
+GET /contract.graphql SHA-256
+057150d790fdf7c2a24f595c9102422651767c0e0209a1c03ae41e792497d027  -
+GET raw /../package.json status
+404

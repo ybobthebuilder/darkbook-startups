@@ -1,0 +1,347 @@
+{
+  "phase": "F0",
+  "status": "PASS",
+  "release_decision": "NO_GO",
+  "generated_at": "2026-11-10T09:01:39.281Z",
+  "inventories": {
+    "root": [
+      {
+        "name": ".gitignore",
+        "type": "file",
+        "bytes": 53,
+        "executable": false
+      },
+      {
+        "name": "artifacts",
+        "type": "directory",
+        "bytes": 4096,
+        "executable": true
+      },
+      {
+        "name": "darwin_semantic_contract_v2.graphql",
+        "type": "file",
+        "bytes": 6995,
+        "executable": false
+      },
+      {
+        "name": "dist",
+        "type": "directory",
+        "bytes": 4096,
+        "executable": true
+      },
+      {
+        "name": "docs",
+        "type": "directory",
+        "bytes": 4096,
+        "executable": true
+      },
+      {
+        "name": "node_modules",
+        "type": "directory",
+        "bytes": 4096,
+        "executable": true
+      },
+      {
+        "name": "package-lock.json",
+        "type": "file",
+        "bytes": 3442,
+        "executable": false
+      },
+      {
+        "name": "package.json",
+        "type": "file",
+        "bytes": 700,
+        "executable": false
+      },
+      {
+        "name": "playwright.config.mjs",
+        "type": "file",
+        "bytes": 159,
+        "executable": false
+      },
+      {
+        "name": "scripts",
+        "type": "directory",
+        "bytes": 4096,
+        "executable": true
+      },
+      {
+        "name": "sergiotavio_darwin_gate_registry_v2_1_1.json",
+        "type": "file",
+        "bytes": 1784,
+        "executable": false
+      },
+      {
+        "name": "test-results",
+        "type": "directory",
+        "bytes": 4096,
+        "executable": true
+      },
+      {
+        "name": "tests",
+        "type": "directory",
+        "bytes": 4096,
+        "executable": true
+      }
+    ],
+    "scripts": [
+      {
+        "name": "audit-f0.mjs",
+        "type": "file",
+        "bytes": 6368,
+        "executable": true
+      },
+      {
+        "name": "build.mjs",
+        "type": "file",
+        "bytes": 1473,
+        "executable": true
+      },
+      {
+        "name": "dev.mjs",
+        "type": "file",
+        "bytes": 2426,
+        "executable": true
+      },
+      {
+        "name": "lib.mjs",
+        "type": "file",
+        "bytes": 1908,
+        "executable": false
+      },
+      {
+        "name": "validate-schema.mjs",
+        "type": "file",
+        "bytes": 3183,
+        "executable": true
+      }
+    ]
+  },
+  "checks": [
+    {
+      "id": "inventory.root",
+      "status": "PASS",
+      "details": "13 entradas (sem .git; não recursivo)"
+    },
+    {
+      "id": "inventory.scripts",
+      "status": "PASS",
+      "details": "5 entradas"
+    },
+    {
+      "id": "file:package.json",
+      "status": "PASS",
+      "details": "OK"
+    },
+    {
+      "id": "file:package-lock.json",
+      "status": "PASS",
+      "details": "OK"
+    },
+    {
+      "id": "file:playwright.config.mjs",
+      "status": "PASS",
+      "details": "OK"
+    },
+    {
+      "id": "file:docs/F0-spec.md",
+      "status": "PASS",
+      "details": "OK"
+    },
+    {
+      "id": "file:darwin_semantic_contract_v2.graphql",
+      "status": "PASS",
+      "details": "OK"
+    },
+    {
+      "id": "file:sergiotavio_darwin_gate_registry_v2_1_1.json",
+      "status": "PASS",
+      "details": "OK"
+    },
+    {
+      "id": "file:scripts/lib.mjs",
+      "status": "PASS",
+      "details": "OK"
+    },
+    {
+      "id": "file:scripts/validate-schema.mjs",
+      "status": "PASS",
+      "details": "OK"
+    },
+    {
+      "id": "file:scripts/audit-f0.mjs",
+      "status": "PASS",
+      "details": "OK"
+    },
+    {
+      "id": "file:scripts/dev.mjs",
+      "status": "PASS",
+      "details": "OK"
+    },
+    {
+      "id": "file:scripts/build.mjs",
+      "status": "PASS",
+      "details": "OK"
+    },
+    {
+      "id": "file:tests/f0.spec.mjs",
+      "status": "PASS",
+      "details": "OK"
+    },
+    {
+      "id": "engines.declared",
+      "status": "PASS",
+      "details": "{\"node\":\">=24.0.0\",\"npm\":\">=11.0.0\"}"
+    },
+    {
+      "id": "engines.runtime.node",
+      "status": "PASS",
+      "details": "v24.22.2"
+    },
+    {
+      "id": "engines.runtime.npm",
+      "status": "PASS",
+      "details": "11.19.1"
+    },
+    {
+      "id": "scripts.mappings",
+      "status": "PASS",
+      "details": "{\"test\":\"playwright test\",\"test:headed\":\"playwright test --headed\",\"validate:schema\":\"node scripts/validate-schema.mjs\",\"audit:f0\":\"node scripts/audit-f0.mjs\",\"dev\":\"node scripts/dev.mjs\",\"build\":\"node scripts/build.mjs\"}"
+    },
+    {
+      "id": "executable:validate-schema",
+      "status": "PASS",
+      "details": "OK"
+    },
+    {
+      "id": "executable:audit-f0",
+      "status": "PASS",
+      "details": "OK"
+    },
+    {
+      "id": "executable:dev",
+      "status": "PASS",
+      "details": "OK"
+    },
+    {
+      "id": "executable:build",
+      "status": "PASS",
+      "details": "OK"
+    },
+    {
+      "id": "scripts.no-placeholders",
+      "status": "PASS",
+      "details": "Inspeção estática dos scripts; execução coberta pelos testes, não inferida por esta busca."
+    },
+    {
+      "id": "normative:darwin_semantic_contract_v2.graphql",
+      "status": "PASS",
+      "details": "SHA-256 057150d790fdf7c2a24f595c9102422651767c0e0209a1c03ae41e792497d027"
+    },
+    {
+      "id": "normative:sergiotavio_darwin_gate_registry_v2_1_1.json",
+      "status": "PASS",
+      "details": "SHA-256 ef63a225f119c508b0a5dd9843b1338a82ff2c6bdfdbaeede49972398e85e1cc"
+    },
+    {
+      "id": "schema.validity-and-f0-structure",
+      "status": "PASS",
+      "details": "buildSchema + validateSchema, RevisionedNode, implementações, mutações e campos genéricos."
+    },
+    {
+      "id": "registry.baseline",
+      "status": "PASS",
+      "details": "14 gates NOT_VERIFIED; release_decision NO_GO; nenhuma promoção."
+    }
+  ],
+  "gates": [
+    {
+      "id": "G01",
+      "title": "Schema valido",
+      "status": "NOT_VERIFIED",
+      "evidence": ""
+    },
+    {
+      "id": "G02",
+      "title": "Ontologia minima",
+      "status": "NOT_VERIFIED",
+      "evidence": ""
+    },
+    {
+      "id": "G03",
+      "title": "Registro de fonte",
+      "status": "NOT_VERIFIED",
+      "evidence": ""
+    },
+    {
+      "id": "G04",
+      "title": "Duas versoes sem alterar a primeira",
+      "status": "NOT_VERIFIED",
+      "evidence": ""
+    },
+    {
+      "id": "G05",
+      "title": "Evidencia favoravel e contraria",
+      "status": "NOT_VERIFIED",
+      "evidence": ""
+    },
+    {
+      "id": "G06",
+      "title": "Isolamento em 3 motivos separados",
+      "status": "NOT_VERIFIED",
+      "evidence": ""
+    },
+    {
+      "id": "G07",
+      "title": "Snapshot historico",
+      "status": "NOT_VERIFIED",
+      "evidence": ""
+    },
+    {
+      "id": "G08",
+      "title": "Export auditavel",
+      "status": "NOT_VERIFIED",
+      "evidence": ""
+    },
+    {
+      "id": "G09",
+      "title": "Import e recuperacao",
+      "status": "NOT_VERIFIED",
+      "evidence": ""
+    },
+    {
+      "id": "G10a",
+      "title": "Autorizacao local",
+      "status": "NOT_VERIFIED",
+      "evidence": ""
+    },
+    {
+      "id": "G10b",
+      "title": "Autorizacao multiusuario",
+      "status": "NOT_VERIFIED",
+      "evidence": ""
+    },
+    {
+      "id": "SEC-RULES",
+      "title": "Regras do projeto",
+      "status": "NOT_VERIFIED",
+      "evidence": ""
+    },
+    {
+      "id": "SEC-SCOPE",
+      "title": "Escopo FOUNDER",
+      "status": "NOT_VERIFIED",
+      "evidence": ""
+    },
+    {
+      "id": "SEC-SCOPE2",
+      "title": "Escopo ADAPTER separado",
+      "status": "NOT_VERIFIED",
+      "evidence": ""
+    }
+  ],
+  "scope_limits": [
+    "O SDL declara campos entityId e revisionId distintos, mas não prova desigualdade dos valores em execução.",
+    "Append-only, autorização, persistência, isolamentos e os gates técnicos não são comprovados por esta auditoria F0."
+  ]
+}
