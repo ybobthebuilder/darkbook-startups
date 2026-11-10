@@ -8,8 +8,9 @@
     "npm": ">=11.0.0"
   },
   "scripts": {
-    "test": "npm run test:acs && playwright test --test-match '**/*.spec.ts' --pass-with-no-tests",
+    "test": "npm run test:acs",
     "test:acs": "tsx --test triage-service/tests/triageService.test.ts",
+    "test:playwright": "playwright test",
     "test:headed": "playwright test --headed",
     "validate:schema": "node scripts/validate-graphql-schema.js",
     "audit:f0": "node scripts/f0-audit-baseline.js",
