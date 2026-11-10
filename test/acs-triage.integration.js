@@ -89,6 +89,7 @@ test('sanitizes CPF and patient name before forming an AI request, then records 
   );
   assert.equal(metrics.measurements.durations.length, 1);
   assert.equal(metrics.measurements.errors.length, 0);
+  assert.doesNotMatch(JSON.stringify(logger.entries), /Ana Silva|123\.456\.789-09/);
 });
 
 test('routes invalid AI output to manual decision and records the error metric', async () => {

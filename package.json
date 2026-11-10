@@ -9,7 +9,7 @@
   },
   "scripts": {
     "test": "playwright test",
-    "test:acs": "node --test",
+    "test:acs": "node --test test/acs-triage.integration.js",
     "test:headed": "playwright test --headed",
     "validate:schema": "node scripts/validate-graphql-schema.js",
     "audit:f0": "node scripts/f0-audit-baseline.js",

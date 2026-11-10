@@ -7,7 +7,7 @@ export const TRIAGE_LEVELS = Object.freeze(['low', 'medium', 'high']);
 const promptTemplate = readFileSync(new URL('../../prompts/triage.txt', import.meta.url), 'utf8');
 const CPF_PATTERN = /\b\d{3}\.?\d{3}\.?\d{3}-?\d{2}\b/g;
 const SELF_IDENTIFICATION_PATTERN =
-  /((?:meu nome (?:é|e)|nome\s*[:=]|sou (?:o|a))\s+)([\p{L}][\p{L}'-]*(?:\s+[\p{L}][\p{L}'-]*){0,3})/giu;
+  /((?:meu nome (?:é|e)|nome\s*[:=]|sou (?:o|a))\s+)([\p{L}][\p{L}'-]*(?:\s+(?!e\b|estou\b|tenho\b|sinto\b|com\b|relato\b)[\p{L}][\p{L}'-]*){0,3})/giu;
 
 function escapeRegExp(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -152,7 +152,9 @@ export class AcsTriageService {
       aiSuggestion = output;
     } catch (error) {
       aiStatus = 'manual';
-      failureReason = failureReason ?? (error.message === 'api_error' ? 'api_error' : 'request_error');
+      failureReason = failureReason ?? (
+        error instanceof Error && error.message === 'api_error' ? 'api_error' : 'request_error'
+      );
       this.requestErrors.add(1, { reason: failureReason });
     } finally {
       this.requestDuration.record(performance.now() - startedAt);
