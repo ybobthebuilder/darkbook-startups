@@ -1,0 +1,10 @@
+PASS entityId
+PASS revisionId
+PASS branchId
+PASS sem campo proibido 1
+PASS sem campo proibido 2
+PASS tem Mutation
+PASS tem Query
+PASS tem IsolationReason
+PASS tem ScopeKind
+PASS tem idempotencyKey

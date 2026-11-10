@@ -12,10 +12,10 @@
     "test:acs": "tsx --test triage-service/tests/triageService.test.ts",
     "test:playwright": "playwright test",
     "test:headed": "playwright test --headed",
-    "validate:schema": "node scripts/validate-graphql-schema.js",
-    "audit:f0": "node scripts/f0-audit-baseline.js",
-    "dev": "echo 'Development server not initialized. Implement after F1.'",
-    "build": "echo 'Build not initialized. Implement after F1.'"
+    "validate:schema": "node scripts/validate-schema.mjs",
+    "audit:f0": "node scripts/audit-f0.mjs",
+    "dev": "node scripts/dev.mjs",
+    "build": "node scripts/build.mjs"
   },
   "dependencies": {
     "@opentelemetry/api": "^1.10.0",

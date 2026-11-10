@@ -1,0 +1,6 @@
+
+> darwin-semantic-rd-graph@0.0.1 audit:f0
+> node scripts/audit-f0.mjs
+
+F0 audit — faltando: nenhum
+F0 audit — scripts ok: sim
