@@ -1,0 +1,231 @@
+# DARWIN Semantic Contract v2 — NORMATIVO
+# Fonte de verdade para G01 / G02 / G03
+# Status: SPECIFICATION / NOT EXECUTED
+# Regras v2.1.1: entityId != revisionId, append-only, 3 isolamentos
+
+scalar DateTime
+scalar SHA256
+scalar JSON
+
+enum LifecycleState { DRAFT ISOLATED ACTIVE ARCHIVED }
+enum ClaimModality { OBSERVATION HYPOTHESIS INFERENCE SIMULATED_CONSTRUCT }
+enum RelationKind { SUPPORTS CONTRADICTS REFUTES DERIVED_FROM REFINES SUPERSEDES CITES DEPENDS_ON USES_AS_EVIDENCE }
+enum OriginType { USER SYSTEM MODEL EXTERNAL_IMPORT }
+enum StructuralValidation { NOT_ASSESSED PASS FAIL }
+enum EvidentialSupport { NOT_ASSESSED STRONG MODERATE WEAK MIXED CONTRADICTED NONE }
+enum HumanApproval { NOT_REQUIRED PENDING APPROVED REJECTED OVERRIDDEN }
+enum SimulationMode { HYPOTHETICAL }
+enum IsolationReason { INTEGRITY RULES EVALUATION }
+enum ScopeKind { FOUNDER ADAPTER }
+
+interface RevisionedNode {
+  entityId: ID!
+  revisionId: ID!
+  schemaVersion: String!
+  previousRevisionId: ID
+  forkedFromRevisionId: ID
+  branchId: ID!
+  createdAt: DateTime!
+  scope: Scope!
+  provenance: Provenance!
+  validation: Validation!
+  lifecycle: LifecycleState!
+}
+
+type Scope {
+  projectId: ID!
+  sessionId: ID
+  scenarioRevisionId: ID
+  ventureRevisionId: ID
+  contextSnapshotRevisionId: ID
+  simulatedYear: Int
+  scopeKind: ScopeKind!
+}
+
+type Provenance {
+  origin: OriginType!
+  actor: Actor!
+  activityId: ID!
+  recordedAt: DateTime!
+  source: SourceAnchor
+  transformation: String
+  evaluationMethod: String
+  modelParametersDigest: SHA256
+  promptRevisionId: ID
+}
+
+type Actor { actorId: ID! actorType: String! displayName: String }
+
+type SourceAnchor {
+  sourceRef: String!
+  sourceRevisionId: String
+  locator: String
+  excerpt: String
+  excerptDigest: SHA256
+  sourceDigest: SHA256
+  digestAlgorithm: String
+  canonicalization: String
+}
+
+type Validation {
+  structural: StructuralValidation!
+  evidential: EvidentialSupport!
+  human: HumanApproval!
+}
+
+type Project implements RevisionedNode {
+  entityId: ID! revisionId: ID! schemaVersion: String!
+  previousRevisionId: ID forkedFromRevisionId: ID branchId: ID!
+  createdAt: DateTime! scope: Scope! provenance: Provenance!
+  validation: Validation! lifecycle: LifecycleState!
+  name: String!
+}
+
+type WorldScenario implements RevisionedNode {
+  entityId: ID! revisionId: ID! schemaVersion: String!
+  previousRevisionId: ID forkedFromRevisionId: ID branchId: ID!
+  createdAt: DateTime! scope: Scope! provenance: Provenance!
+  validation: Validation! lifecycle: LifecycleState!
+  title: String!
+  description: String
+}
+
+type Question implements RevisionedNode {
+  entityId: ID! revisionId: ID! schemaVersion: String!
+  previousRevisionId: ID forkedFromRevisionId: ID branchId: ID!
+  createdAt: DateTime! scope: Scope! provenance: Provenance!
+  validation: Validation! lifecycle: LifecycleState!
+  text: String! stageNumber: Int!
+}
+
+type Answer implements RevisionedNode {
+  entityId: ID! revisionId: ID! schemaVersion: String!
+  previousRevisionId: ID forkedFromRevisionId: ID branchId: ID!
+  createdAt: DateTime! scope: Scope! provenance: Provenance!
+  validation: Validation! lifecycle: LifecycleState!
+  questionRevisionId: ID!
+  text: String!
+}
+
+type Claim implements RevisionedNode {
+  entityId: ID! revisionId: ID! schemaVersion: String!
+  previousRevisionId: ID forkedFromRevisionId: ID branchId: ID!
+  createdAt: DateTime! scope: Scope! provenance: Provenance!
+  validation: Validation! lifecycle: LifecycleState!
+  modality: ClaimModality!
+  text: String!
+  observedAt: DateTime
+  validAt: DateTime
+  simulatedYear: Int
+}
+
+type Evidence implements RevisionedNode {
+  entityId: ID! revisionId: ID! schemaVersion: String!
+  previousRevisionId: ID forkedFromRevisionId: ID branchId: ID!
+  createdAt: DateTime! scope: Scope! provenance: Provenance!
+  validation: Validation! lifecycle: LifecycleState!
+  excerpt: String
+}
+
+type EvidenceAssessment {
+  assessmentId: ID!
+  evidenceRevisionId: ID!
+  claimRevisionId: ID!
+  relationRevisionId: ID!
+  method: String!
+  limitations: String
+  createdAt: DateTime!
+}
+
+type Relation {
+  relationId: ID!
+  revisionId: ID!
+  schemaVersion: String!
+  previousRevisionId: ID
+  kind: RelationKind!
+  fromRevisionId: ID!
+  toRevisionId: ID!
+  scope: Scope!
+  provenance: Provenance!
+  validation: Validation!
+  lifecycle: LifecycleState!
+  createdAt: DateTime!
+}
+
+type Decision implements RevisionedNode {
+  entityId: ID! revisionId: ID! schemaVersion: String!
+  previousRevisionId: ID forkedFromRevisionId: ID branchId: ID!
+  createdAt: DateTime! scope: Scope! provenance: Provenance!
+  validation: Validation! lifecycle: LifecycleState!
+  text: String!
+  simulationMode: SimulationMode!
+}
+
+type SimulationEvent {
+  eventId: ID!
+  revisionId: ID!
+  idempotencyKey: String!
+  scenarioRevisionId: ID!
+  decisionRevisionId: ID
+  simulatedYear: Int!
+  payload: String!
+  createdAt: DateTime!
+  provenance: Provenance!
+}
+
+type ContextSnapshot {
+  snapshotId: ID!
+  revisionId: ID!
+  branchId: ID!
+  revisionIds: [ID!]!
+  compilerVersion: String!
+  temporalMode: String!
+  artifactHash: SHA256!
+  artifactHashAlgorithm: String!
+  createdAt: DateTime!
+}
+
+type ContextFile {
+  fileId: ID!
+  snapshotRevisionId: ID!
+  path: String!
+  contentHash: SHA256!
+}
+
+type IsolationItem {
+  isolationId: ID!
+  revisionId: ID!
+  reason: IsolationReason!
+  detail: String!
+  segregatedAt: DateTime!
+  retentionPolicyRef: String!
+  payloadRetained: Boolean!
+}
+
+input CreateWorldScenarioInput { projectId: ID! title: String! description: String branchId: ID }
+input CreateClaimInput { projectId: ID! modality: ClaimModality! text: String! branchId: ID observedAt: DateTime validAt: DateTime }
+input CreateEvidenceInput { projectId: ID! excerpt: String branchId: ID }
+input CreateRelationInput { kind: RelationKind! fromRevisionId: ID! toRevisionId: ID! projectId: ID! }
+input CreateDecisionInput { projectId: ID! text: String! branchId: ID }
+input CreateSimulationEventInput { scenarioRevisionId: ID! decisionRevisionId: ID idempotencyKey: String! simulatedYear: Int! payload: String! }
+
+type Query {
+  getCurrent(entityId: ID!): RevisionedNode
+  getRevisions(entityId: ID!): [RevisionedNode!]!
+  getRevision(revisionId: ID!): RevisionedNode
+  getTemporal(branchId: ID!, scenarioRevisionId: ID!, contextSnapshotId: ID): [RevisionedNode!]!
+  getRelations(fromRevisionId: ID, toRevisionId: ID): [Relation!]!
+  getIsolation(reason: IsolationReason): [IsolationItem!]!
+  getSnapshot(snapshotId: ID!): ContextSnapshot
+}
+
+type Mutation {
+  createWorldScenario(input: CreateWorldScenarioInput!): WorldScenario!
+  createClaim(input: CreateClaimInput!): Claim!
+  createEvidence(input: CreateEvidenceInput!): Evidence!
+  createRelation(input: CreateRelationInput!): Relation!
+  createDecision(input: CreateDecisionInput!): Decision!
+  createSimulationEvent(input: CreateSimulationEventInput!): SimulationEvent!
+  # NENHUM update fisico. NENHUM campo generico de mudancas. NENHUM delete de historico.
+  # Retratacao = nova revisao, nunca apagar.
+}
